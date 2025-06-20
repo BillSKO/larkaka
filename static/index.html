@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nikola Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    body { background-color: #111; color: white; font-family: Arial, sans-serif; margin: 0; }
+    .full-header { display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; padding: 10px; }
+    .button-center { text-align: center; flex-grow: 1; }
+    .header button, .controls button { background: #000; color: #fff; padding: 10px 20px; border: 1px solid #444; border-radius: 5px; cursor: pointer; margin: 0 5px; }
+    select, input[type=range] { padding: 5px; font-size: 16px; }
+    .status-circles.centered { display: flex; justify-content: center; gap: 10px; margin-top: 5px; }
+    .circle { width: 15px; height: 15px; border-radius: 50%; border: 2px solid #666; }
+    .circle.small-circle { width: 12px; height: 12px; }
+    .status-live { background-color: green; }
+    .status-simulering { background-color: gold; }
+    .status-stoppad { background-color: red; }
+    .status-left, .right-lock { display: flex; align-items: center; gap: 10px; }
+    .controls { display: flex; justify-content: center; align-items: center; padding: 10px; background: #1e1e1e; gap: 10px; }
+    .tv-container { height: 350px; width: 100%; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; padding: 10px; height: 65vh; }
+    .box { background: #222; border: 1px solid #444; border-radius: 5px; padding: 10px; overflow: auto; height: 100%; min-height: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.93em; }
+    th, td { border: 1px solid #333; padding: 5px; text-align: center; }
+    th { background: #333; font-weight: bold; }
+    .tight-table td, .tight-table th { padding: 3px 4px; font-size: 0.92em; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="full-header">
+    <div class="status-left">
+        <span>Nikola:</span>
+        <div id="nikola-status-circle" class="circle small-circle"></div>
+    </div>
+    <div class="button-center">
+        <button onclick="sendCommand('start')">Start</button>
+        <button onclick="sendCommand('stop')">Stopp</button>
+        <button onclick="sendCommand('simulering')">Simulering</button>
+        <button onclick="sendCommand('live')">Live</button>
+        <div class="status-circles centered">
+            <div id="circle-live" class="circle"></div>
+            <div id="circle-simulering" class="circle"></div>
+            <div id="circle-stoppad" class="circle"></div>
+        </div>
+    </div>
+    <div class="right-lock">
+        <button onclick="lockTradeAmount()">Lock Trade</button>
+        <div id="lock-indicator" class="circle small-circle"></div>
+    </div>
+</div>
+
+<div class="controls">
+    Valuta:
+    <select id="currency" onchange="fetchData(); updateAmount();">
+        <option value="SEK">SEK</option>
+        <option value="EUR">EUR</option>
+        <option value="USD">USD</option>
+    </select>
+    Belopp:
+    <input type="range" id="amountSlider" min="1" max="20000" value="1000"
+           oninput="document.getElementById('amountValue').textContent=this.value; updateAmount();">
+    <span id="amountValue">1000</span> kr
+</div>
+
+<div class="tv-container">
+    <div id="tradingview_advanced"></div>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script type="text/javascript">
+    new TradingView.widget({
+        "container_id": "tradingview_advanced",
+        "width": "100%",
+        "height": "350",
+        "symbol": "BINANCE:BTCUSDT",
+        "interval": "15",
+        "timezone": "Etc/UTC",
+        "theme": "dark",
+        "style": "1",
+        "locale": "en",
+        "toolbar_bg": "#f1f3f6",
+        "enable_publishing": false,
+        "allow_symbol_change": true,
+        "hide_top_toolbar": false,
+        "hide_side_toolbar": false,
+        "studies": ["MACD@tv-basicstudies", "RSI@tv-basicstudies"],
+        "details": true,
+        "hotlist": true,
+        "calendar": false,
+        "support_host": "https://www.tradingview.com"
+    });
+    </script>
+</div>
+
+<div class="grid">
+    <div class="box">
+        <h3>Live Trades</h3>
+        <table id="liveTradesTable" class="tight-table">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Plattform</th>
+                <th>Strategy</th>
+                <th>Conf (%)</th>
+                <th>Risk</th>
+                <th>Amount</th>
+                <th>Profit</th>
+                <th>Close in</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        </table>
+    </div>
+    <div class="box">
+        <h3>AI Signal Monitor</h3>
+        <table id="aiSignalsTable" class="tight-table">
+        <thead>
+            <tr>
+                <th>Plattform</th>
+                <th>Symbol</th>
+                <th>Strategy</th>
+                <th>Risk</th>
+                <th>Conf (%)</th>
+                <th>Amount</th>
+                <th>Trade time</th>
+                <th>Next in</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        </table>
+    </div>
+    <div class="box">
+        <h3>Profit Summary</h3>
+        <p id="profitData">Profit: 0 kr<br>Loss: 0 kr<br>NET: 0 kr</p>
+        <canvas id="profitChart" width="100%" height="120"></canvas>
+    </div>
+    <div class="box">
+        <h3>Top Strategies</h3>
+        <ul id="topStrategiesList"></ul>
+        <canvas id="topStrategiesChart" width="100%" height="140"></canvas>
+    </div>
+</div>
+
+<script>
+let tradeAmountLocked = false;
+let topStrategiesChart = null;
+let profitChart = null;
+
+function updateStatusCircle(mode) {
+    document.getElementById("circle-live").className = "circle";
+    document.getElementById("circle-simulering").className = "circle";
+    document.getElementById("circle-stoppad").className = "circle";
+    if (mode.status === "running" && mode.demo === false) {
+        document.getElementById("circle-live").classList.add("status-live");
+    } else if (mode.status === "running" && mode.demo === true) {
+        document.getElementById("circle-simulering").classList.add("status-simulering");
+    } else {
+        document.getElementById("circle-stoppad").classList.add("status-stoppad");
+    }
+}
+
+function sendCommand(cmd) {
+    if (cmd === 'simulering') cmd = 'demo';
+    fetch(`/api/control/${cmd}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => updateStatusCircle(data.mode || {}));
+}
+
+function updateAmount() {
+    if (tradeAmountLocked) return;
+    const sekAmount = parseInt(document.getElementById("amountSlider").value);
+    const currency = document.getElementById("currency").value;
+    fetch(`/api/update_trade_amount`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: sekAmount, currency: currency })
+    });
+}
+
+function lockTradeAmount() {
+    tradeAmountLocked = !tradeAmountLocked;
+    document.getElementById("lock-indicator").style.backgroundColor = tradeAmountLocked ? "green" : "transparent";
+}
+
+function formatCountdown(val) {
+    // val kan vara ett ISO-datum eller sekunder
+    if (!val) return "--";
+    if (!isNaN(Number(val))) { // om det är sekunder
+        let t = Number(val);
+        let h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+    // Annars, tolka som datum
+    try {
+        const now = new Date();
+        const end = new Date(val);
+        const diff = Math.max(0, end - now);
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    } catch { return "--"; }
+}
+
+function fetchData() {
+    const currency = document.getElementById("currency").value;
+
+    fetch(`/api/data?currency=${currency}`)
+        .then(res => res.json())
+        .then(data => {
+            // Live Trades
+            const liveTable = document.getElementById("liveTradesTable").getElementsByTagName("tbody")[0];
+            liveTable.innerHTML = "";
+            data.live_trades.forEach(row => {
+                const tr = document.createElement("tr");
+                for (let i = 0; i < 8; ++i) {
+                    const td = document.createElement("td");
+                    if (i === 7) td.textContent = formatCountdown(row[i]);
+                    else td.textContent = row[i];
+                    tr.appendChild(td);
+                }
+                liveTable.appendChild(tr);
+            });
+
+            // AI Signals
+            const aiTable = document.getElementById("aiSignalsTable").getElementsByTagName("tbody")[0];
+            aiTable.innerHTML = "";
+            data.ai_signals.forEach(row => {
+                const tr = document.createElement("tr");
+                for (let i = 0; i < 8; ++i) {
+                    const td = document.createElement("td");
+                    // Näst sista = tid trade ska pågå, sista = tid till trade
+                    if (i === 7 || i === 6) td.textContent = formatCountdown(row[i]);
+                    else td.textContent = row[i];
+                    tr.appendChild(td);
+                }
+                aiTable.appendChild(tr);
+            });
+
+            // Profit Data
+            document.getElementById("profitData").innerHTML =
+                `Profit: ${data.total_profit} ${currency}<br>` +
+                `Loss: ${data.total_loss} ${currency}<br>` +
+                `NET: ${data.total_profit + data.total_loss} ${currency}`;
+
+            // Profit Chart
+            if (data.profit_history) {
+                if (profitChart) profitChart.destroy();
+                const ctx = document.getElementById('profitChart').getContext('2d');
+                profitChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.profit_history.labels,
+                        datasets: [{
+                            label: 'Net PnL',
+                            data: data.profit_history.values,
+                            fill: true,
+                            borderColor: 'rgba(30,200,130,0.8)',
+                            backgroundColor: 'rgba(30,200,130,0.1)',
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        plugins: { legend: { display: false }},
+                        scales: { x: { display: false }, y: { color: "#fff" } }
+                    }
+                });
+            }
+
+            // Top Strategies List & Chart
+            const list = document.getElementById("topStrategiesList");
+            list.innerHTML = "";
+            data.top_strategies.forEach(item => {
+                list.innerHTML += `<li>${item.strategy} (${item.count})</li>`;
+            });
+
+            if (data.top_strategies && data.top_strategies.length > 0) {
+                if (topStrategiesChart) topStrategiesChart.destroy();
+                const ctx = document.getElementById('topStrategiesChart').getContext('2d');
+                topStrategiesChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.top_strategies.map(x => x.strategy),
+                        datasets: [{
+                            label: 'Antal Trades',
+                            data: data.top_strategies.map(x => x.count),
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                        }]
+                    },
+                    options: {
+                        plugins: { legend: { display: false }},
+                        scales: { y: { beginAtZero: true, color: "#fff" }, x: { color: "#fff" } }
+                    }
+                });
+            }
+        });
+
+    fetch('/api/status')
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("nikola-status-circle").style.backgroundColor =
+                data.status === "running" ? "green" : "red";
+            updateStatusCircle(data);
+        });
+}
+
+fetchData();
+setInterval(fetchData, 5000);
+</script>
+
+</body>
+</html>
