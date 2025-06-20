@@ -1,0 +1,62 @@
+{
+  "range_breakout": {
+    "name": "Range Breakout",
+    "description": "Identifierar när priset bryter ut från en konsolideringszon med hög volym.",
+    "timeframe": "M15 - H1",
+    "entry": "Break över motstånd efter minst 3 candles i tight range.",
+    "exit": "TP: senaste range + spread, SL: falskt breakoutnivå.",
+    "indicators": ["Volume", "Support/Resistance", "ATR"],
+    "symbols": ["BTC/USDT", "ETH/USDT", "USD/JPY", "GBP/JPY"],
+    "platforms": ["Binance", "Bybit", "Bitget", "Forex"]
+  },
+  "volatility_squeeze": {
+    "name": "Volatility Squeeze",
+    "description": "Använder Bollinger Bands och Keltner Channels för att hitta lågvolatila faser före stora rörelser.",
+    "timeframe": "M15 - H1",
+    "entry": "BB < KC + volymspike, följ riktning på breakout.",
+    "exit": "TP: 1.5x SL, SL: motsatt sida av breakout-ljus.",
+    "indicators": ["Bollinger Bands", "Keltner Channels", "Volume"],
+    "symbols": ["SOL/USDT", "DOT/USDT", "AUD/USD", "GBP/JPY"],
+    "platforms": ["Binance", "Bitget", "Forex"]
+  },
+  "news_reaction": {
+    "name": "News Spike Reaction",
+    "description": "Tradar på kraftiga rörelser efter nyhetssläpp med fokus på överreaktion och reversals.",
+    "timeframe": "M5 - M15",
+    "entry": "Efter nyhetsrelease, när pris rusat 1-2 ATR, ta position mot rörelsen.",
+    "exit": "TP: 1.5x SL, SL: 10-15 pips bortom spike.",
+    "indicators": ["Economic Calendar", "ATR", "Volume"],
+    "symbols": ["USD/TRY", "USD/CAD", "USD/SEK", "EUR/USD"],
+    "platforms": ["Forex", "Binance", "Bybit"]
+  },
+  "mean_reversion": {
+    "name": "Mean Reversion",
+    "description": "Tradar när priset avviker från sitt medelvärde i en icke-trendande marknad.",
+    "timeframe": "H1 - H4",
+    "entry": "RSI över 70 eller under 30, + pris långt från MA20.",
+    "exit": "TP: när pris når MA20, SL: senaste high/low.",
+    "indicators": ["RSI", "EMA20", "Volume"],
+    "symbols": ["ETH/USDT", "DOT/USDT", "AUD/NZD", "GBP/CHF"],
+    "platforms": ["Binance", "Bitget", "Forex"]
+  },
+  "forex_trend": {
+    "name": "Forex Trend Follower",
+    "description": "Följer trenden med hjälp av EMA och MACD – klassisk swingtrading.",
+    "timeframe": "H4 - D1",
+    "entry": "EMA50 > EMA200 och MACD > 0 = köp (vice versa för sälj).",
+    "exit": "TP: senaste struktur, SL: senaste swing.",
+    "indicators": ["EMA50", "EMA200", "MACD"],
+    "symbols": ["EUR/USD", "USD/CHF", "USD/CAD", "EUR/JPY"],
+    "platforms": ["Forex", "Binance", "Bitget"]
+  },
+  "binary_trend_expiry": {
+    "name": "Binary Trend Expiry",
+    "description": "Följ trenden i högre timeframe och gå in med 1–5 minuters expiry på pullbacks.",
+    "timeframe": "M1 entry, M15 trend",
+    "entry": "Trend upp på M15, RSI studsar från 30 på M1 = CALL. Omvänt = PUT.",
+    "exit": "Fixed expiry: 1m, 3m eller 5m beroende på signalstyrka.",
+    "indicators": ["RSI", "EMA 20", "EMA 50"],
+    "symbols": ["EUR/USD", "BTC/USD", "USD/JPY", "US100"],
+    "platforms": ["Deriv", "Quotex", "Pocket Option"]
+  }
+}

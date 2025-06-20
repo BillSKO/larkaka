@@ -1,0 +1,11 @@
+[
+  {
+    "symbol": "BTC/USDT",
+    "strategy": "Range Breakout",
+    "platform": "Binance",
+    "buy_price": 104000.00,
+    "sell_price": 104500.00,
+    "result": 0.48,
+    "timestamp": "2025-06-13T12:00:00"
+  }
+]

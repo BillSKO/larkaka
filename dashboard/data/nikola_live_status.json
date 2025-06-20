@@ -1,0 +1,13 @@
+{
+  "status": "Stopped",
+  "strategy": "Trend",
+  "balance": 10000,
+  "open_trades": 0,
+  "total_profit": 0,
+  "total_loss": 0,
+  "latest_trade": {
+    "symbol": "-",
+    "result": "-",
+    "time": "-"
+  }
+}

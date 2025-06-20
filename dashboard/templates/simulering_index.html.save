@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Nikola Dashboard – Simulering</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://s3.tradingview.com/tv.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #111; color: #fff; font-family: Arial, sans-serif; font-size: 11px; }
+    .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; background: #1e1e1e; padding: 8px; gap: 12px; }
+    .status-light { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #444; display: inline-block; margin-left: 4px; }
+    .status-green { background: green; }
+    .status-red { background: red; }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "tradingview live"
+        "tradingview utfall"
+        "signals pnl"
+        "konto pnl";
+      gap: 6px;
+      padding: 6px;
+      height: calc(100vh - 100px);
+    }
+    .box {
+      background: #1e1e1e; border: 1px solid #333; border-radius: 6px; padding: 6px; overflow-y: auto;
+    }
+    .tradingview { grid-area: tradingview; height: 56vh; padding: 0; border: none; }
+    .live { grid-area: live; height: 28vh; }
+    .utfall { grid-area: utfall; height: 28vh; display: flex; flex-direction: column; justify-content: flex-start; }
+    .signals { grid-area: signals; height: 20vh; }
+    .konto { grid-area: konto; height: 14vh; }
+    .pnl { grid-area: pnl; height: 34vh; }
+    h3 { margin: 0 0 4px 0; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; font-size: 10px; }
+    th, td { border: 1px solid #444; padding: 2px; text-align: left; }
+    tfoot td { border: none; padding: 4px 2px; font-weight: bold; }
+    .profit-summary { display: flex; gap: 10px; margin-top: auto; padding-top: 4px; }
+    .summary-box { width: 33%; }
+    input, select, button { background: #000; color: white; border: 1px solid #555; padding: 2px 4px; font-size: 10px; }
+    .clickable { cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>Nikola <span id="nikolaStatus" class="status-light"></span></div>
+  <div>
+    <button onclick="setControl('start')">Start</button> <span id="startStatus" class="status-light"></span>
+    <button onclick="setControl('stop')">Stop</button> <span id="stopStatus" class="status-light"></span>
+  </div>
+  <div>
+    <span class="clickable" onclick="toggleMarket('crypto')">Crypto</span> <span id="cryptoStatus" class="status-light"></span>
+    <span class="clickable" onclick="toggleMarket('forex')">Forex</span> <span id="forexStatus" class="status-light"></span>
+    <span class="clickable" onclick="toggleMarket('binary')">Binary</span> <span id="binaryStatus" class="status-light"></span>
+  </div>
+  <div>
+    Belopp <input id="amountInput" type="number" value="100" onchange="saveSettingsToBackend()">
+    <select id="currencySelect" onchange="saveSettingsToBackend()"><option>SEK</option><option>USD</option><option>EUR</option></select>
+    <button>🔒</button>
+    <button onclick="window.location.href='/live'">Gå till Simulering</button>
+  </div>
+  <div>
+    Bitget <span id="bitgetStatus" class="status-light"></span>
+    Bybit <span id="bybitStatus" class="status-light"></span>
+    Binance <span id="binanceStatus" class="status-light"></span>
+    Deriv <span id="derivStatus" class="status-light"></span>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="tradingview" id="tradingview_widget_container"></div>
+
+  <div class="box live">
+    <h3>Simulering Trades</h3>
+    <table><thead><tr><th>Symbol</th><th>Strategi</th><th>Belopp</th><th>Confidence</th><th>Profit</th></tr></thead><tbody id="liveTradesBody"></tbody></table>
+  </div>
+
+  <div class="box utfall">
+    <h3>Trade Utfall</h3>
+    <table><thead><tr><th>Symbol</th><th>Strategi</th><th>Plattform</th><th>Köpt</th><th>Såld</th><th>Resultat</th></tr></thead><tbody id="tradeOutcomeBody"></tbody></table>
+    <div class="profit-summary">
+      <div class="summary-box">Profit: <span id="profitTotal">0</span></div>
+      <div class="summary-box">Loss: <span id="lossTotal">0</span></div>
+      <div class="summary-box">Overall: <span id="overallTotal">0</span></div>
+    </div>
+  </div>
+
+  <div class="box signals">
+    <h3>AI Signals</h3>
+    <table><thead><tr><th>Symbol</th><th>Strategi</th><th>Confidence</th><th>Belopp</th><th>Profit</th></tr></thead><tbody id="aiSignalsBody"></tbody></table>
+  </div>
+
+  <div class="box konto">
+    <h3>Kontobalanser</h3>
+    <div id="accountBalances">Laddar saldon...</div>
+  </div>
+
+  <div class="box pnl">
+    <h3>PnL & Konto-grafer</h3>
+    <canvas id="pnlChart"></canvas>
+  </div>
+</div>
+
+<div class="box" style="height: 24vh; overflow-y: auto;">
+  <h3>Top Strategies</h3>
+  <table>
+    <thead>
+      <tr><th>Strategi</th><th>Resultat (%)</th></tr>
+    </thead>
+    <tbody id="topStrategiesBody"><tr><td colspan="2">Laddar...</td></tr></tbody>
+  </table>
+</div>
+
+<script>
+new TradingView.widget({
+  container_id: "tradingview_widget_container",
+  width: "100%", height: "100%",
+  symbol: "BINANCE:BTCUSDT", interval: "15",
+  timezone: "Europe/Stockholm", theme: "dark",
+  style: "1", locale: "en", toolbar_bg: "#1e1e1e",
+  enable_publishing: false, hide_top_toolbar: false,
+  allow_symbol_change: true,
+  studies: ["MACD@tv-basicstudies", "RSI@tv-basicstudies"]
+});
+
+function setControl(cmd) {
+  fetch('/api/control/' + cmd, { method: 'POST' }).then(fetchData);
+}
+
+function toggleMarket(market) {
+  let selected = JSON.parse(localStorage.getItem("selectedMarkets") || '{"crypto":false,"forex":false,"binary":false}');
+  selected[market] = !selected[market];
+  localStorage.setItem("selectedMarkets", JSON.stringify(selected));
+  fetch('/api/update_markets', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(selected)
+  }).then(fetchData);
+}
+
+function saveSettingsToBackend() {
+  const settings = {
+    currency: document.getElementById("currencySelect").value,
+    amount: parseFloat(document.getElementById("amountInput").value),
+    selectedMarkets: JSON.parse(localStorage.getItem("selectedMarkets") || "{}")
+  };
+  fetch('/api/save_settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(settings)
+  });
+}
+
+async function applySavedSettings() {
+  try {
+    const res = await fetch('/data/settings_log.json');
+    const data = await res.json();
+    if (data.currency) document.getElementById("currencySelect").value = data.currency;
+    if (data.amount) document.getElementById("amountInput").value = data.amount;
+    if (data.selectedMarkets) localStorage.setItem("selectedMarkets", JSON.stringify(data.selectedMarkets));
+  } catch (e) {
+    console.log("⚠️ Kunde inte läsa settings_log.json");
+  }
+}
+
+async function fetchData() {
+  const currency = document.getElementById("currencySelect").value;
+  const res = await fetch(`/api/data?currency=${currency}`);
+  const data = await res.json();
+
+  document.getElementById("nikolaStatus").className = "status-light " + (data.status === "running" ? "status-green" : "status-red");
+  document.getElementById("startStatus").className = "status-light " + (data.status === "running" ? "status-green" : "");
+  document.getElementById("stopStatus").className = "status-light " + (data.status === "stopped" ? "status-red" : "");
+  let selected = JSON.parse(localStorage.getItem("selectedMarkets") || '{"crypto":false,"forex":false,"binary":false}');
+  ["crypto", "forex", "binary"].forEach(m => {
+    const el = document.getElementById(m + "Status");
+    el.className = "status-light " + (selected[m] ? "status-green" : "");
+  });
+
+  const s = data.balances || {};
+  document.getElementById("bitgetStatus").className = "status-light " + (s.Bitget ? "status-green" : "status-red");
+  document.getElementById("bybitStatus").className = "status-light " + (s.Bybit ? "status-green" : "status-red");
+  document.getElementById("binanceStatus").className = "status-light " + (s.Binance ? "status-green" : "status-red");
+  document.getElementById("derivStatus").className = "status-light " + (s.Deriv ? "status-green" : "status-red");
+
+  let liveHTML = "";
+  for (const t of data.live_trades || []) {
+    liveHTML += `<tr><td>${t.symbol}</td><td>${t.strategy}</td><td>${t.amount}</td><td>${t.confidence}</td><td>${t.profit}</td></tr>`;
+  }
+  document.getElementById("liveTradesBody").innerHTML = liveHTML;
+
+  let aiHTML = "";
+  for (const s of data.ai_signals || []) {
+    aiHTML += `<tr><td>${s.symbol}</td><td>${s.strategy}</td><td>${s.confidence}</td><td>${s.amount}</td><td>${s.profit || "?"}</td></tr>`;
+  }
+  document.getElementById("aiSignalsBody").innerHTML = aiHTML;
+
+  document.getElementById("profitTotal").innerText = data.total_profit;
+  document.getElementById("lossTotal").innerText = data.total_loss;
+  document.getElementById("overallTotal").innerText = (data.total_profit + data.total_loss).toFixed(2);
+
+  document.getElementById("accountBalances").innerHTML = `
+    Binance: ${s.Binance?.total || 0}<br>
+    Bybit: ${s.Bybit?.total || 0}<br>
+    Bitget: ${s.Bitget?.total || 0}<br>
+    Deriv: ${s.Deriv?.total || 0}
+  `;
+
+  renderTopStrategies(data);
+}
+
+function renderTopStrategies(data) {
+  const body = document.getElementById("topStrategiesBody");
+  const strategies = data.top_strategies || {};
+  const rows = Object.entries(strategies).map(([name, stat]) => `
+    <tr>
+      <td>${name}</td>
+      <td>${stat.total_pnl}</td>
+    </tr>
+  `);
+  body.innerHTML = rows.length > 0 ? rows.join("") : '<tr><td colspan="2">Inga data</td></tr>';
+}
+
+window.onload = () => {
+  applySavedSettings();
+  fetchData();
+};
+setInterval(fetchData, 10000);
+</script>
+
+</body>
+</html>

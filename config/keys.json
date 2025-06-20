@@ -1,0 +1,15 @@
+{
+  "binance": {
+    "apiKey": "6Ii97rGSxcPYGqcfKln7pQE66XiueQo8vLyW2lMOPxSNKvCemu27LcvmUSENTBpo",
+    "secret": "VZpVIRJWm5zEXD3ibEbGcYRzzV4Mw5pDjZuNynNZQBU19e2NJfRKE6nl3FqLzFgI"
+  },
+  "bybit": {
+    "apiKey": "lJt4ZlmMT0s3PkfMSA",
+    "secret": "jj5ZXN4VG12CJX3zoFXehtvWe7HMGEG8Ped6"
+  },
+  "bitget": {
+    "apiKey": "bg_ed7471c7f196695c49358b966aa2f7cf",
+    "secret": "b99dd33d949c16e7287065cbb47e0d5e91ffd953c0e4df24338bc9f56cf73a59",
+    "password": "L7Z3V9B2KD"
+  }
+}

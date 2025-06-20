@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/bill/NikolaDeploy/dashboard/symbol_loader.py", line 1, in <module>
+    import ccxt
+ModuleNotFoundError: No module named 'ccxt'
+Traceback (most recent call last):
+  File "/home/bill/NikolaDeploy/dashboard/symbol_loader.py", line 1, in <module>
+    import ccxt
+ModuleNotFoundError: No module named 'ccxt'
+✅ Binance: 3699 symboler hämtade.
+✅ Bybit: 2611 symboler hämtade.
+✅ Bitget: 1374 symboler hämtade.
+💾 symbol_whitelist.json uppdaterad 2025-06-07T02:00:14.067126

@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/billskogsberg/NikolaWeb/trade_executor.py", line 97, in <module>
+    exit_time = datetime.fromisoformat(trade["exit_time"])
+KeyError: 'exit_time'

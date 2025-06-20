@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Nikola Dashboard - Simulering</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .full-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e1e1e;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+        .header-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px;
+        }
+        .header button {
+            background: #000;
+            color: #fff;
+            padding: 6px 12px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .status-circle {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-left: 5px;
+            border: 1px solid #ccc;
+        }
+        .status-circle.green {
+            background-color: green;
+        }
+        .status-circle.red {
+            background-color: red;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 12px;
+            padding: 12px;
+        }
+        .box {
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            overflow: auto;
+        }
+        iframe {
+            width: 100%;
+            height: 480px;
+            border: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: white;
+        }
+        th, td {
+            padding: 6px;
+            border-bottom: 1px solid #333;
+            text-align: left;
+        }
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 10px;
+        }
+        .controls input, .controls select {
+            padding: 4px 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="full-header header">
+        <div class="header-section">
+            <b>Nikola</b>
+            <div id="nikola-status" class="status-circle red"></div>
+        </div>
+        <div class="header-section">
+            <button id="start-btn">Start</button>
+            <button id="stop-btn">Stop</button>
+        </div>
+        <div class="header-section">
+            <button id="crypto-btn">Crypto</button>
+            <button id="forex-btn">Forex</button>
+            <button id="binary-btn">Binary</button>
+        </div>
+        <div class="header-section controls">
+            <label>Belopp:</label>
+            <input type="number" id="amount-input" value="10" min="1" max="10000" step="1" />
+            <select id="currency-select">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="SEK">SEK</option>
+            </select>
+            <button onclick="location.href='/live'">Gå till Live</button>
+        </div>
+        <div class="header-section">
+            Bitget <div id="bitget-status" class="status-circle red"></div>
+            Bybit <div id="bybit-status" class="status-circle red"></div>
+            Binance <div id="binance-status" class="status-circle red"></div>
+            Deriv <div id="deriv-status" class="status-circle red"></div>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="box" style="grid-column: 1; grid-row: 1;">
+            <h3>TradingView Chart</h3>
+            <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_advanced&symbol=BTCUSDT&interval=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&studies_overrides={}" allowfullscreen></iframe>
+        </div>
+        <div class="box" style="grid-column: 2; grid-row: 1;">
+            <h3>Simulering Trades</h3>
+            <table id="live-trades-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th><th>Platform</th><th>Strategy</th><th>Confidence</th><th>Amount</th><th>Expected Profit</th><th>Countdown</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="box" style="grid-column: 1; grid-row: 2;">
+            <h3>AI Signals</h3>
+            <table id="ai-signals-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th><th>Strategy</th><th>Confidence</th><th>Amount</th><th>Signal Time</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="box" style="grid-column: 2; grid-row: 2;">
+            <h3>Trade Utfall</h3>
+            <table id="trade-outcomes-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th><th>Platform</th><th>Buy/Sell</th><th>Result</th><th>Profit/Loss</th><th>Time</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="box" style="grid-column: 1; grid-row: 3;">
+            <h3>Kontobalanser</h3>
+            <table id="balances-table">
+                <thead>
+                    <tr>
+                        <th>Platform</th><th>Balance</th><th>Currency</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="box" style="grid-column: 2; grid-row: 3;">
+            <h3>PnL & Konto-grafer</h3>
+            <canvas id="pnl-chart" height="200"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    async function refreshData() {
+        try {
+            const resp = await fetch('/api/data');
+            const data = await resp.json();
+
+            // Nikola ON/OFF
+            document.getElementById('nikola-status').className = 'status-circle ' + (data.nikola_active ? 'green' : 'red');
+
+            // Exchange status
+            document.getElementById('bitget-status').className = 'status-circle ' + (data.bitget_status ? 'green' : 'red');
+            document.getElementById('bybit-status').className = 'status-circle ' + (data.bybit_status ? 'green' : 'red');
+            document.getElementById('binance-status').className = 'status-circle ' + (data.binance_status ? 'green' : 'red');
+            document.getElementById('deriv-status').className = 'status-circle ' + (data.deriv_status ? 'green' : 'red');
+
+            // Market toggles
+            const markets = data.markets || {};
+            toggleButtonState('crypto-btn', markets.crypto);
+            toggleButtonState('forex-btn', markets.forex);
+            toggleButtonState('binary-btn', markets.binary);
+
+        } catch (e) {
+            console.error('Error fetching data:', e);
+        }
+    }
+
+    function toggleButtonState(buttonId, isActive) {
+        const btn = document.getElementById(buttonId);
+        if (isActive) {
+            btn.style.backgroundColor = '#060';
+        } else {
+            btn.style.backgroundColor = '#000';
+        }
+    }
+
+    // START / STOP buttons
+    document.getElementById('start-btn').onclick = async () => {
+        await fetch('/api/control/start', { method: 'POST' });
+        refreshData();
+    };
+    document.getElementById('stop-btn').onclick = async () => {
+        await fetch('/api/control/stop', { method: 'POST' });
+        refreshData();
+    };
+
+    // MARKET toggle buttons
+    document.getElementById('crypto-btn').onclick = async () => {
+        await toggleMarket('crypto');
+    };
+    document.getElementById('forex-btn').onclick = async () => {
+        await toggleMarket('forex');
+    };
+    document.getElementById('binary-btn').onclick = async () => {
+        await toggleMarket('binary');
+    };
+
+    async function toggleMarket(market) {
+        const btn = document.getElementById(market + '-btn');
+        const isActive = btn.style.backgroundColor === 'rgb(0, 102, 0)'; // green
+        await fetch('/api/update_markets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ market: market, active: !isActive })
+        });
+        refreshData();
+    }
+
+    setInterval(refreshData, 5000);
+    refreshData();
+</script>
+</body>
+</html>

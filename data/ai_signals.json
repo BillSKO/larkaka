@@ -1,0 +1,102 @@
+[
+  {
+    "timestamp": "2025-06-19T17:39:28.385989",
+    "platform": "Bitget",
+    "symbol": "ETH/USDT",
+    "planned_strategy": "Range Breakout",
+    "strategy_description": "Identifierar n\u00e4r priset bryter ut fr\u00e5n en konsolideringszon med h\u00f6g volym.",
+    "risk": 16.3,
+    "confidence": 64.2,
+    "eta": "Op T"
+  },
+  {
+    "timestamp": "2025-06-19T17:39:28.642129",
+    "platform": "Bybit",
+    "symbol": "ETH/USDT",
+    "planned_strategy": "Range Breakout",
+    "strategy_description": "Identifierar n\u00e4r priset bryter ut fr\u00e5n en konsolideringszon med h\u00f6g volym.",
+    "risk": 13.5,
+    "confidence": 72.7,
+    "eta": "Op T"
+  },
+  {
+    "timestamp": "2025-06-19T17:40:28.445975",
+    "platform": "Binance",
+    "symbol": "SOL/USDT",
+    "planned_strategy": "Volatility Squeeze",
+    "strategy_description": "Anv\u00e4nder Bollinger Bands och Keltner Channels f\u00f6r att hitta l\u00e5gvolatila faser f\u00f6re stora r\u00f6relser.",
+    "risk": 48.0,
+    "confidence": 90.7,
+    "eta": "Op T"
+  },
+  {
+    "timestamp": "2025-06-19T17:40:28.698051",
+    "platform": "Binance",
+    "symbol": "BTC/USDT",
+    "planned_strategy": "Range Breakout",
+    "strategy_description": "Identifierar n\u00e4r priset bryter ut fr\u00e5n en konsolideringszon med h\u00f6g volym.",
+    "risk": 29.9,
+    "confidence": 95.4,
+    "eta": "Op T"
+  },
+  {
+    "timestamp": "2025-06-19T17:41:28.506829",
+    "platform": "Bybit",
+    "symbol": "ETH/USDT",
+    "planned_strategy": "Range Breakout",
+    "strategy_description": "Identifierar n\u00e4r priset bryter ut fr\u00e5n en konsolideringszon med h\u00f6g volym.",
+    "risk": 20.1,
+    "confidence": 83.5,
+    "eta": "Op T"
+  },
+  {
+    "timestamp": "2025-06-19T17:41:28.759407",
+    "platform": "Binance",
+    "symbol": "ETH/USDT",
+    "planned_strategy": "Mean Reversion",
+    "strategy_description": "Tradar n\u00e4r priset avviker fr\u00e5n sitt medelv\u00e4rde i en icke-trendande marknad.",
+    "risk": 15.9,
+    "confidence": 68.1,
+    "eta": "Op T"
+  },
+  {
+    "timestamp": "2025-06-19T17:42:28.566946",
+    "platform": "Bybit",
+    "symbol": "USD/JPY",
+    "planned_strategy": "Range Breakout",
+    "strategy_description": "Identifierar n\u00e4r priset bryter ut fr\u00e5n en konsolideringszon med h\u00f6g volym.",
+    "risk": 11.0,
+    "confidence": 93.5,
+    "eta": "Op T"
+  },
+  {
+    "timestamp": "2025-06-19T17:42:28.820110",
+    "platform": "Bitget",
+    "symbol": "ETH/USDT",
+    "planned_strategy": "Mean Reversion",
+    "strategy_description": "Tradar n\u00e4r priset avviker fr\u00e5n sitt medelv\u00e4rde i en icke-trendande marknad.",
+    "risk": 48.6,
+    "confidence": 63.5,
+    "eta": "Op T"
+  },
+  {
+    "timestamp": "2025-06-19T17:43:28.601959",
+    "platform": "Binance",
+    "symbol": "ETH/USDT",
+    "planned_strategy": "Mean Reversion",
+    "strategy_description": "Tradar n\u00e4r priset avviker fr\u00e5n sitt medelv\u00e4rde i en icke-trendande marknad.",
+    "risk": 45.1,
+    "confidence": 75.1,
+    "eta": "Op T"
+  },
+  {
+    "timestamp": "2025-06-19T17:43:28.881045",
+    "platform": "Forex",
+    "symbol": "ETH/USDT",
+    "planned_strategy": "Mean Reversion",
+    "strategy_description": "Tradar n\u00e4r priset avviker fr\u00e5n sitt medelv\u00e4rde i en icke-trendande marknad.",
+    "risk": 39.7,
+    "confidence": 82.0,
+    "eta": "Op T"
+  }
+]

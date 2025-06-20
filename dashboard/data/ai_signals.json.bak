@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": "2025-06-19T16:15:24.608129",
+    "platform": "Bitget",
+    "symbol": "EUR/USD",
+    "planned_strategy": "Forex Trend Follower",
+    "strategy_description": "F\u00f6ljer trenden med hj\u00e4lp av EMA och MACD \u2013 klassisk swingtrading.",
+    "risk": 13.9,
+    "confidence": 72.8,
+    "eta": "Op T"
+  }
+]
+  }
+]

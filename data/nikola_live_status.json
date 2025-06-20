@@ -1,0 +1,37 @@
+{
+    "total_profit": 1287.5,
+    "total_loss": 312.75,
+    "last_trade": {
+        "symbol": "ETH/USDT",
+        "direction": "BUY",
+        "amount": 500,
+        "result": "+25.3"
+    },
+    "strategy": "mean_reversion",
+    "pnl_chart": [
+        1000,
+        1050,
+        1100,
+        1080,
+        1200,
+        1150,
+        1287
+    ],
+    "markets": [
+        "BTC/USDT",
+        "ETH/USDT",
+        "SOL/USDT",
+        "XRP/USDT",
+        "DOGE/USDT",
+        "EUR/USD",
+        "USD/JPY",
+        "GBP/USD",
+        "AUD/USD",
+        "NASDAQ",
+        "DAX",
+        "GOLD/USD",
+        "SILVER/USD"
+    ],
+    "autotrade_enabled": false,
+    "manual_trade_amount": ""
+}

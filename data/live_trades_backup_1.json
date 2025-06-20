@@ -1,0 +1,62 @@
+[
+  {
+    "timestamp": "2025-06-09T16:05:32.359497",
+    "symbol": "EUR/USD",
+    "platform": "Forex",
+    "strategy": "Forex Trend Follower",
+    "confidence": 69.2,
+    "risk": 38.0,
+    "entry_price": 545.07,
+    "exit_time": "2025-06-09T16:06:32.359497",
+    "sl_price": 534.17,
+    "tp_price": 561.42
+  },
+  {
+    "timestamp": "2025-06-09T16:05:32.359792",
+    "symbol": "ETH/USDT",
+    "platform": "Bitget",
+    "strategy": "Mean Reversion",
+    "confidence": 92.4,
+    "risk": 18.6,
+    "entry_price": 356.19,
+    "exit_time": "2025-06-09T16:06:32.359792",
+    "sl_price": 349.07,
+    "tp_price": 366.88
+  },
+  {
+    "timestamp": "2025-06-09T16:05:32.360624",
+    "symbol": "USD/JPY",
+    "platform": "Bybit",
+    "strategy": "Range Breakout",
+    "confidence": 84.9,
+    "risk": 10.3,
+    "entry_price": 843.16,
+    "exit_time": "2025-06-09T16:06:32.360624",
+    "sl_price": 826.3,
+    "tp_price": 868.45
+  },
+  {
+    "timestamp": "2025-06-09T16:05:32.361408",
+    "symbol": "SOL/USDT",
+    "platform": "Bitget",
+    "strategy": "Volatility Squeeze",
+    "confidence": 93.5,
+    "risk": 26.3,
+    "entry_price": 751.56,
+    "exit_time": "2025-06-09T16:06:32.361408",
+    "sl_price": 736.53,
+    "tp_price": 774.11
+  },
+  {
+    "timestamp": "2025-06-09T16:05:32.362305",
+    "symbol": "BTC/USDT",
+    "platform": "Bitget",
+    "strategy": "Range Breakout",
+    "confidence": 95.3,
+    "risk": 38.2,
+    "entry_price": 417.74,
+    "exit_time": "2025-06-09T16:06:32.362305",
+    "sl_price": 409.39,
+    "tp_price": 430.27
+  }
+]

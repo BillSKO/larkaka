@@ -1,0 +1,5 @@
+{
+  "apiKey": "DIN_API_KEY",
+  "secret": "DITT_SECRET",
+  "password": "DITT_API_PASSWORD"
+}

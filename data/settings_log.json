@@ -1,0 +1,9 @@
+{
+  "currency": "USD",
+  "amount": 10,
+  "selectedMarkets": {
+    "binary": true,
+    "crypto": true,
+    "forex": true
+  }
+}

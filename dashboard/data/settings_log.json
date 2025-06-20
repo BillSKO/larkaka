@@ -1,0 +1,9 @@
+{
+  "currency": "SEK",
+  "amount": 100,
+  "selectedMarkets": {
+    "crypto": true,
+    "forex": true,
+    "binary": true
+  }
+}

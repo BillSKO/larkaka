@@ -1,0 +1,216 @@
+<!-- nano /home/billskogsberg/NikolaWeb/dashboard/templates/live_index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nikola LIVE Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background-color: #111; color: white; font-family: Arial, sans-serif; margin: 0; }
+        .header { display: flex; align-items: center; justify-content: space-between; background: #1e1e1e; padding: 10px; }
+        .header button, .header input, .header select {
+            background: #000; color: #fff; padding: 10px; border: 1px solid #444; border-radius: 5px; margin: 0 5px; cursor: pointer;
+        }
+        .header .status-indicator {
+            width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-left: 5px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(3, 300px);
+            gap: 10px;
+            padding: 10px;
+        }
+        .grid-item {
+            background: #222; padding: 10px; border-radius: 8px; overflow-y: auto;
+        }
+        iframe {
+            border: none; width: 100%; height: 100%;
+        }
+        table {
+            width: 100%; border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #444;
+        }
+        th, td {
+            padding: 5px; text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <button id="startBtn">Start</button>
+            <button id="stopBtn">Stop</button>
+        </div>
+        <div>
+            <button id="cryptoBtn">Crypto <span id="cryptoStatus" class="status-indicator"></span></button>
+            <button id="forexBtn">Forex <span id="forexStatus" class="status-indicator"></span></button>
+            <button id="binaryBtn">Binary <span id="binaryStatus" class="status-indicator"></span></button>
+        </div>
+        <div>
+            <label>Belopp:</label>
+            <input type="number" id="amountInput" value="10">
+            <select id="currencySelect">
+                <option>USD</option>
+                <option>EUR</option>
+                <option>SEK</option>
+            </select>
+            <button id="gotoSimBtn">Gå till Simulering</button>
+        </div>
+        <div>
+            Bitget <span id="bitgetStatus" class="status-indicator"></span>
+            Bybit <span id="bybitStatus" class="status-indicator"></span>
+            Binance <span id="binanceStatus" class="status-indicator"></span>
+            Deriv <span id="derivStatus" class="status-indicator"></span>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="grid-item">
+            <iframe src="https://s.tradingview.com/widgetembed/?symbol=BINANCE:BTCUSDT&interval=1&theme=dark&style=1&timezone=Etc/UTC&withdateranges=1&hide_side_toolbar=0&allow_symbol_change=1"></iframe>
+        </div>
+        <div class="grid-item">
+            <h3>Simulering Trades</h3>
+            <table>
+                <thead>
+                    <tr><th>Symbol</th><th>Platform</th><th>Amount</th><th>Profit</th></tr>
+                </thead>
+                <tbody id="liveTradesBody"></tbody>
+            </table>
+        </div>
+        <div class="grid-item">
+            <h3>AI Signals</h3>
+            <table>
+                <thead>
+                    <tr><th>Symbol</th><th>Confidence</th><th>Direction</th><th>Amount</th></tr>
+                </thead>
+                <tbody id="aiSignalsBody"></tbody>
+            </table>
+        </div>
+        <div class="grid-item">
+            <h3>Trade Utfall</h3>
+            <table>
+                <thead>
+                    <tr><th>Symbol</th><th>Result</th><th>Profit</th></tr>
+                </thead>
+                <tbody id="tradeOutcomesBody"></tbody>
+            </table>
+        </div>
+        <div class="grid-item">
+            <h3>Kontobalanser</h3>
+            <table>
+                <thead>
+                    <tr><th>Platform</th><th>Balance</th><th>Currency</th></tr>
+                </thead>
+                <tbody id="balancesBody"></tbody>
+            </table>
+        </div>
+        <div class="grid-item">
+            <h3>PnL & Konto-grafer</h3>
+            <canvas id="pnlChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        async function fetchData() {
+            const res = await fetch("/api/data");
+            const data = await res.json();
+
+            // Status-indikatorer
+            document.getElementById("cryptoStatus").style.backgroundColor = data.crypto_active ? "green" : "red";
+            document.getElementById("forexStatus").style.backgroundColor = data.forex_active ? "green" : "red";
+            document.getElementById("binaryStatus").style.backgroundColor = data.binary_active ? "green" : "red";
+
+            document.getElementById("bitgetStatus").style.backgroundColor = data.bitget_status ? "green" : "red";
+            document.getElementById("bybitStatus").style.backgroundColor = data.bybit_status ? "green" : "red";
+            document.getElementById("binanceStatus").style.backgroundColor = data.binance_status ? "green" : "red";
+            document.getElementById("derivStatus").style.backgroundColor = data.deriv_status ? "green" : "red";
+
+            // Live trades
+            const tradesBody = document.getElementById("liveTradesBody");
+            tradesBody.innerHTML = "";
+            data.live_trades.forEach(t => {
+                tradesBody.innerHTML += `<tr><td>${t.symbol}</td><td>${t.platform}</td><td>${t.amount}</td><td>${t.profit}</td></tr>`;
+            });
+
+            // AI signals
+            const signalsBody = document.getElementById("aiSignalsBody");
+            signalsBody.innerHTML = "";
+            data.ai_signals.forEach(s => {
+                signalsBody.innerHTML += `<tr><td>${s.symbol}</td><td>${s.confidence}</td><td>${s.direction}</td><td>${s.amount}</td></tr>`;
+            });
+
+            // Trade outcomes
+            const outcomesBody = document.getElementById("tradeOutcomesBody");
+            outcomesBody.innerHTML = "";
+            data.trade_outcomes.forEach(o => {
+                outcomesBody.innerHTML += `<tr><td>${o.symbol}</td><td>${o.result}</td><td>${o.profit}</td></tr>`;
+            });
+
+            // Balances
+            const balancesBody = document.getElementById("balancesBody");
+            balancesBody.innerHTML = "";
+            data.balances.forEach(b => {
+                balancesBody.innerHTML += `<tr><td>${b.platform}</td><td>${b.balance}</td><td>${b.currency}</td></tr>`;
+            });
+
+            // PnL Chart (dummy)
+            const ctx = document.getElementById("pnlChart").getContext("2d");
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.pnl_chart.labels,
+                    datasets: [{
+                        label: 'PnL',
+                        data: data.pnl_chart.values,
+                        borderColor: 'green',
+                        backgroundColor: 'rgba(0,255,0,0.1)'
+                    }]
+                }
+            });
+        }
+
+        document.getElementById("startBtn").addEventListener("click", async () => {
+            await fetch("/api/control/start", { method: "POST" });
+        });
+
+        document.getElementById("stopBtn").addEventListener("click", async () => {
+            await fetch("/api/control/stop", { method: "POST" });
+        });
+
+        document.getElementById("cryptoBtn").addEventListener("click", async () => {
+            await fetch("/api/update_markets", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({market: "crypto", active: true})
+            });
+        });
+
+        document.getElementById("forexBtn").addEventListener("click", async () => {
+            await fetch("/api/update_markets", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({market: "forex", active: true})
+            });
+        });
+
+        document.getElementById("binaryBtn").addEventListener("click", async () => {
+            await fetch("/api/update_markets", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({market: "binary", active: true})
+            });
+        });
+
+        document.getElementById("gotoSimBtn").addEventListener("click", () => {
+            window.location.href = "/simulering";
+        });
+
+        setInterval(fetchData, 5000);
+        fetchData();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
